@@ -95,18 +95,22 @@ kubectl get nodes
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
 
-### Patch for kind + EC2
+### Then edit the metrics server deployment to add necessary arguments:
 
 ```bash
-kubectl patch deployment metrics-server -n kube-system \
---type='json' \
--p='[
-  {
-    "op": "add",
-    "path": "/spec/template/spec/containers/0/args/-",
-    "value": "--kubelet-insecure-tls"
-  }
-]'
+kubectl -n kube-system edit deployment metrics-server
+```
+
+Add these arguments under `spec.containers.args`:
+
+- --kubelet-insecure-tls
+- --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+
+Save the changes, then restart and verify the deployment:
+
+```bash
+kubectl -n kube-system rollout restart deployment metrics-server
+kubectl get pods -n kube-system
 ```
 
 Verify:
@@ -150,10 +154,14 @@ kubectl apply -f hpa.yaml
 ## 4️⃣ Generate Load (Trigger HPA)
 
 ```bash
-kubectl run load-generator \
+kubectl run load-generator1 \
 --image=busybox \
 --restart=Never \
 -- /bin/sh -c "while true; do wget -q -O- http://hpa-nginx; done"
+```
+
+```bash
+kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://hpa-nginx; done"
 ```
 
 Check scaling:
@@ -163,6 +171,11 @@ kubectl get hpa
 kubectl get pods -w
 ```
 
+### Delete everything in hpa folder
+
+```bash
+kubectl delete -f .
+```
 ---
 
 # 🟩 PART 2: VPA (Vertical Pod Autoscaler)
@@ -201,6 +214,12 @@ kubectl apply -f vpa.yaml
 
 ---
 
+## Check vpa object
+
+```bash
+kubectl get vpa
+```
+
 ## 3️⃣ View VPA Recommendations
 
 ```bash
@@ -214,3 +233,28 @@ You will see:
 * Current usage
 
 ⚠️ VPA **restarts pods** to apply new resources.
+
+🔄 How to SEE VPA in action (important)
+
+Generate load:
+
+kubectl run vpa-load \
+--image=busybox \
+--restart=Never \
+-- /bin/sh -c "while true; do wget -q -O- http://vpa-nginx; done"
+
+
+Watch pods:
+
+kubectl get pods -w
+
+
+You will see:
+
+Pod TERMINATED
+
+New pod CREATED
+
+New CPU/memory applied ✅
+
+That restart = VPA doing its job

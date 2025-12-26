@@ -8,4 +8,4 @@ spec:
     kind: Deployment
     name: vpa-nginx
   updatePolicy:
-    updateMode: Auto
+    updateMode: Recreate
