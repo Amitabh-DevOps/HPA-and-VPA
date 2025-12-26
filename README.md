@@ -124,34 +124,6 @@ kubectl top pods
 
 ## 1️⃣ HPA Deployment (`hpa-deployment.yaml`)
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hpa-nginx
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hpa-nginx
-  template:
-    metadata:
-      labels:
-        app: hpa-nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx
-        ports:
-        - containerPort: 80
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "256Mi"
-```
 
 ```bash
 kubectl apply -f hpa-deployment.yaml
@@ -161,19 +133,6 @@ kubectl apply -f hpa-deployment.yaml
 
 ## 2️⃣ Service (`hpa-service.yaml`)
 
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hpa-nginx
-spec:
-  selector:
-    app: hpa-nginx
-  ports:
-  - port: 80
-    targetPort: 80
-```
-
 ```bash
 kubectl apply -f hpa-service.yaml
 ```
@@ -181,27 +140,6 @@ kubectl apply -f hpa-service.yaml
 ---
 
 ## 3️⃣ HPA Manifest (`hpa.yaml`)
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: hpa-nginx
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: hpa-nginx
-  minReplicas: 1
-  maxReplicas: 5
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
-```
 
 ```bash
 kubectl apply -f hpa.yaml
@@ -249,33 +187,6 @@ kubectl get pods -n kube-system | grep vpa
 
 ## 1️⃣ VPA Deployment (`vpa-deployment.yaml`)
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: vpa-nginx
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: vpa-nginx
-  template:
-    metadata:
-      labels:
-        app: vpa-nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx
-        resources:
-          requests:
-            cpu: "50m"
-            memory: "64Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-```
-
 ```bash
 kubectl apply -f vpa-deployment.yaml
 ```
@@ -283,20 +194,6 @@ kubectl apply -f vpa-deployment.yaml
 ---
 
 ## 2️⃣ VPA Manifest (`vpa.yaml`)
-
-```yaml
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: vpa-nginx
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: vpa-nginx
-  updatePolicy:
-    updateMode: Auto
-```
 
 ```bash
 kubectl apply -f vpa.yaml
