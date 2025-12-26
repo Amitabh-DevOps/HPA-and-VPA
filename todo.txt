@@ -1,0 +1,17 @@
+Part 1:
+
+1. what is pod
+2. what is scaling
+3. why scaling is needed
+4. what is horizontal pod autoscaling
+5. what is vertical pod autoscaling
+6. difference between horizontal and vertical pod autoscaling (Pros and Cons)
+
+and in next video we will see how to implement horizontal and vertical pod autoscaling using kind cluster
+
+-----------------------------------
+
+Part 2:
+
+7. Demo of horizontal pod autoscaling
+8. Demo of vertical pod autoscaling
